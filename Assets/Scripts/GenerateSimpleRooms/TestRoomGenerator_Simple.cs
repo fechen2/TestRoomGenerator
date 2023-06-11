@@ -16,7 +16,7 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class TestRoomGenerator_Simple : MonoBehaviour
 {
-    [SerializeField] private Vector2 cellSize = new Vector2(100, 80);
+    private Vector2 cellSize = new Vector2(100, 80);
     [SerializeField] private SimpleRoomDataGenerator _roomDataGenerator = new();
     [SerializeField] private GameObject _startPrefab;
     [SerializeField] private GameObject _normalPrefab;
@@ -151,7 +151,6 @@ public class SimpleRoomDataGenerator
 
     private bool GenerateRooms_Once()
     {
-        Debug.Log("============================GenerateRooms_Once=========================================startRoom:" + startRoom);
         while (_rooms.Count > 0)
         {
             Vector2Int currentRoom = _rooms[0];
