@@ -272,12 +272,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9045b81cb53a14284d07aad5098788, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: {x: 100, y: 80}
   _roomDataGenerator:
     MaxHorizontalCount: 10
     MaxVerticalCount: 9
     MinRoomCount: 7
     MaxRoomCount: 15
+    SafeCount: 10000
+    _appropriatePercentV1: 3
+    _appropriatePercentV2: 7
+    _errorMaxPercentV1: 5
+    _errorMaxPercentV2: 5
+    _errorMinPercentV1: 4.5
+    _errorMinPercentV2: 5.5
   _startPrefab: {fileID: 8874943631715851608, guid: 6a3185a47c8b20a48b63e15e142cc6e0, type: 3}
   _normalPrefab: {fileID: 8874943631715851608, guid: 3aaa0c6aa6e742541b050a15676bf42d, type: 3}
   _bossPrefab: {fileID: 8874943631715851608, guid: c639e380492b4534ea901d6706f76156, type: 3}
@@ -381,12 +387,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9045b81cb53a14284d07aad5098788, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: {x: 100, y: 80}
   _roomDataGenerator:
     MaxHorizontalCount: 0
     MaxVerticalCount: 0
     MinRoomCount: 0
     MaxRoomCount: 0
+    SafeCount: 100
+    _appropriatePercentV1: 3
+    _appropriatePercentV2: 7
+    _errorMaxPercentV1: 4.5
+    _errorMaxPercentV2: 5.5
+    _errorMinPercentV1: 5
+    _errorMinPercentV2: 5
   _startPrefab: {fileID: 0}
   _normalPrefab: {fileID: 0}
   _bossPrefab: {fileID: 0}

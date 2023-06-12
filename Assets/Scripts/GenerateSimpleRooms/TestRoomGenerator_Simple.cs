@@ -85,13 +85,24 @@ public class SimpleRoomDataGenerator
     [SerializeField] private int MaxVerticalCount;
     [SerializeField] private int MinRoomCount;
     [SerializeField] private int MaxRoomCount;
+    [SerializeField] private int SafeCount = 1000;
+
+    [SerializeField] private float _appropriatePercentV1 = 3.0f;
+    [SerializeField] private float _appropriatePercentV2 = 7.0f;
+    private float _appropriatePercent = 3.0f / 7.0f;
+    [SerializeField] private float _errorMaxPercentV1 = 5f;
+    [SerializeField] private float _errorMaxPercentV2 = 5f;
+    private float _errorMaxPercent = 5f / 5f;
+    [SerializeField] private float _errorMinPercentV1 = 5f;
+    [SerializeField] private float _errorMinPercentV2 = 5f;
+    private float _errorMinPercent = 5f / 5f;
+
     private int[,] _map;
     public Vector2Int startRoom { get; private set; }
     public Vector2Int bossRoom { get; private set; }
     public Vector2Int rewardRoom { get; private set; }
     public Vector2Int coinRoom { get; private set; }
     public List<Vector2Int> normalRooms { get; private set; } = new();
-
     private List<Vector2Int> _rooms = new();
     private List<Vector2Int> _endRooms = new();
     private List<Vector2Int> _linkRooms = new();
@@ -101,11 +112,13 @@ public class SimpleRoomDataGenerator
     /// </summary>
     private int _currentRoomCount;
 
-    private int SafeCount = 100;
     private int _currentGenerateCount;
 
     public void Init()
     {
+        _appropriatePercent = _appropriatePercentV1 / _appropriatePercentV2;
+        _errorMaxPercent = _errorMaxPercentV1 / _errorMaxPercentV2;
+        _errorMinPercent = _errorMinPercentV1 / _errorMinPercentV2;
         if (_map == null)
         {
             _map = new int[MaxHorizontalCount + 1, MaxVerticalCount + 1];
@@ -123,17 +136,20 @@ public class SimpleRoomDataGenerator
         _rooms.Clear();
         _endRooms.Clear();
         _currentRoomCount = 0;
-        _rooms.Add(startRoom);
-        _currentRoomCount += 1;
         bossRoom = Vector2Int.zero;
         rewardRoom = Vector2Int.zero;
         coinRoom = Vector2Int.zero;
         normalRooms.Clear();
         _linkRooms.Clear();
+
+        //set start room to _rooms
+        AddCoordToRoom(startRoom);
+        //
     }
 
     public bool GenerateRooms()
     {
+        _currentGenerateCount = 0;
         while (_currentGenerateCount < SafeCount)
         {
             _currentGenerateCount++;
@@ -172,6 +188,7 @@ public class SimpleRoomDataGenerator
         }
 
         if (_currentRoomCount < MinRoomCount || _endRooms.Count == 0) return false;
+
         bossRoom = _endRooms[^1];
         _endRooms.RemoveAt(_endRooms.Count - 1);
         (bool rCoin, Vector2Int posCoin) = GetRandomEndRoom();
@@ -179,9 +196,57 @@ public class SimpleRoomDataGenerator
 
         if (rCoin && rReward)
         {
+            #region 房间个数百分比判断
+
+            //1.相对x轴倾斜45度和135度，判断区域房间个数比例
+            //2.x轴y轴判断区域房间个数比例
+            int upCount_45 = 0;
+            int downCount_45 = 0;
+            int upCount_135 = 0;
+            int downCount_135 = 0;
+            int leftCount = 0;
+            int rightCount = 0;
+            int upCount = 0;
+            int downCount = 0;
+
+            for (int i = 0; i < MaxHorizontalCount + 1; i++)
+            {
+                for (int j = 0; j < MaxVerticalCount + 1; j++)
+                {
+                    if (_map[i, j] > 0)
+                    {
+                        int offsetX = i - startRoom.x;
+                        int offsetY = j - startRoom.y;
+
+                        if (offsetY > offsetX) upCount_45++;
+                        if (offsetY < offsetX) downCount_45++;
+                        if (offsetY < -offsetX) downCount_135++;
+                        if (offsetY > -offsetX) upCount_135++;
+                        if (offsetX > 0) rightCount++;
+                        if (offsetX < 0) leftCount++;
+                        if (offsetY > 0) upCount++;
+                        if (offsetY < 0) downCount++;
+                    }
+                }
+            }
+
+            if (CheckRoomPercent(upCount_45, downCount_45)
+                && CheckRoomPercent(upCount_135, downCount_135))
+               // && CheckRoomPercent(leftCount, rightCount)
+              //  && CheckRoomPercent(upCount, downCount))
+            {
+            }
+            else
+            {
+                return false;
+            }
+
+            #endregion
+
             coinRoom = posCoin;
             rewardRoom = posReward;
             normalRooms.AddRange(_endRooms);
+
             normalRooms.AddRange(_linkRooms);
             normalRooms.Remove(startRoom); //remove start room
             if (normalRooms.Contains(startRoom) || normalRooms.Contains(coinRoom) || normalRooms.Contains(bossRoom) || normalRooms.Contains(rewardRoom))
@@ -195,17 +260,34 @@ public class SimpleRoomDataGenerator
         return false;
     }
 
+    private bool CheckRoomPercent(int left, int right)
+    {
+        if (left == 0 || right == 0) return true;
+
+        float v1 = (float)left / right;
+        float v2 = (float)right / left;
+
+        if ((v1 < _errorMaxPercent && v1 > _errorMinPercent) || (v2 < _errorMaxPercent && v2 > _errorMinPercent)) return false;
+        if (v1 < _appropriatePercent || v2 < _appropriatePercent) return true;
+
+        return false;
+    }
+
     public bool CheckAndSetCeil(Vector2Int destPos)
     {
         if (_map[destPos.x, destPos.y] == 1) return false;
         if (NeighbourCount(destPos) > 1) return false;
         if (_currentRoomCount >= MaxRoomCount) return false;
         if (Random.value < 0.5f) return false;
-        if (destPos == startRoom) return false;
+        AddCoordToRoom(destPos);
+        return true;
+    }
+
+    private void AddCoordToRoom(Vector2Int destPos)
+    {
         _rooms.Add(destPos);
         _currentRoomCount += 1;
         _map[destPos.x, destPos.y] = 1;
-        return true;
     }
 
     private int NeighbourCount(Vector2Int pos)
