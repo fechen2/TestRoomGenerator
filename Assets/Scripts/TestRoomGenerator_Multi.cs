@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using CTBA;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -33,7 +32,6 @@ public class TestRoomGenerator_Multi : MonoBehaviour
                 {
                     ShapeEnum shapeEnum = shapeRoomInfo.shapeEnum;
                     Vector2Int leftDownCoord = shapeRoomInfo.shapeLeftDownCoord;
-                    Debug.Log($"chenfeitest OnGUI shapeEnum={shapeEnum} leftDownCoord={leftDownCoord}");
                     go = Instantiate(_specialPrefabs[shapeEnum], _parentTrans);
                     go.GetComponent<RectTransform>().anchoredPosition = GetSpecialRectPos(shapeEnum, leftDownCoord);
                 }
